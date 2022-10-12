@@ -90,12 +90,12 @@ class SteamClient:
 
     @login_required
     def get_my_inventory(self, game: GameOptions, merge: bool = True, count: int = 5000) -> dict:
-        steam_id = self.steam_guard['steamid']
+        steam_id = self.steam_guard['Session']['SteamID']
         return self.get_partner_inventory(steam_id, game, merge, count)
 
     @login_required
     def get_partner_inventory(self, partner_steam_id: str, game: GameOptions, merge: bool = True, count: int = 5000) -> dict:
-        url = '/'.join([SteamUrl.COMMUNITY_URL, 'inventory', partner_steam_id, game.app_id, game.context_id])
+        url = '/'.join([SteamUrl.COMMUNITY_URL, 'inventory', str(partner_steam_id), game.app_id, game.context_id])
         params = {'l': 'english',
                   'count': count}
         response_dict = self._session.get(url, params=params).json()
@@ -206,7 +206,7 @@ class SteamClient:
         return text_between(offer_response_text, "var g_ulTradePartnerSteamID = '", "';")
 
     def _confirm_transaction(self, trade_offer_id: str) -> dict:
-        confirmation_executor = ConfirmationExecutor(self.steam_guard['identity_secret'], self.steam_guard['steamid'],
+        confirmation_executor = ConfirmationExecutor(self.steam_guard['identity_secret'], self.steam_guard['Session']['SteamID'],
                                                      self._session)
         return confirmation_executor.send_trade_allow_request(trade_offer_id)
 
